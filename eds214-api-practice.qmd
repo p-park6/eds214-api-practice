@@ -1,0 +1,80 @@
+---
+title: "eds214-api-practice"
+format: html
+editor: visual
+---
+
+```{r}
+library(dataRetrieval)
+library(tidyverse)
+
+siteNumber <- "11118500"
+parameterCd <- "00060"
+startDate <- "2023-01-04"
+endDate <- "2023-01-19"
+
+discharge <- readNWISdv(siteNumber, parameterCd, startDate, endDate)
+
+ventura_discharge_line_20230109 <- 
+  ggplot(data = discharge, 
+         aes(x = Date, 
+             y = X_00060_00003)) + 
+  geom_line() + 
+  labs(x = "Date", y = "Discharge (ft^3/s)", title = "Discharge in Ventura River", subtitle = "Discharge caused by Hurricane Hilary")
+
+ventura_discharge_line_20230109
+ventura_discharge_line
+
+```
+
+# Call in libraries that I will use
+```{r}
+library(metajam)
+
+```
+
+
+```{r}
+#store in url
+url <- "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3A7fc6f6db-c5ea-426a-a743-1f2edafb43b8"
+
+#store url in repository(get it set up first)
+local_path <- "."
+
+#download data from url and put it in repository
+metajam::download_d1_data(url, local_path)
+
+```
+
+#Reading csv in R
+```{r}
+ak_household_data <- metajam::read_d1_files("doi_10.5063_F1N58JPP__household_language__csv/")
+```
+
+```{r}
+#store ak_data to have just data
+ak_data <- ak_household_data$data
+
+#get data for percentage of only english speakers between the years 2009 to 2015
+ak_only_english <- ak_data %>% 
+  # mutate(only_english_percent = (speak_only_english / total)) %>% 
+  filter(Year %in% c(2009:2015)) %>% 
+  group_by(Year) %>% 
+  summarise(sum_only_english = sum(speak_only_english)/sum(total))
+
+#looked at min and max to make sure we have 2009 to 2015
+min(ak_only_english$Year)
+max(ak_only_english$Year)
+
+#make graph
+ak_only_english_graph <- 
+  ggplot(data = ak_only_english, 
+         aes(x = Year, 
+             y = sum_only_english)) + 
+  geom_line()
+ak_only_english_graph
+```
+
+
+
+
